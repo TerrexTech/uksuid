@@ -1,0 +1,40 @@
+dist: trusty
+
+language: go
+
+go:
+  - "1.11"
+
+branches:
+  except:
+    - staging.tmp
+
+# Only clone the most recent commit
+git:
+  depth: 1
+
+env:
+  global:
+    - DEP_VERSION="0.5.0"
+
+before_install:
+  # Download dep binary to $GOPATH/bin
+  - curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 -o $GOPATH/bin/dep
+  - chmod +x $GOPATH/bin/dep
+
+install:
+  - dep ensure
+
+script:
+  - go test -v ./...
+
+before_deploy:
+  - export GIT_BRANCH=master
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: curl -sL https://git.io/fAgkD | bash
+  on:
+    all_branches: true
+    tags: true
